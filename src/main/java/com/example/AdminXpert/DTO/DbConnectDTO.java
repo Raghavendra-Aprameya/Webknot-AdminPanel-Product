@@ -7,4 +7,6 @@ import lombok.Setter;
 @Setter
 public class DbConnectDTO {
      private String connectionUrl;
+     private  String username;
+     private String password;
 }
