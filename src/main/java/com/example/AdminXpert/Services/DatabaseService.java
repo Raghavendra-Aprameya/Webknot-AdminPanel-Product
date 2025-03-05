@@ -118,7 +118,6 @@ public class DatabaseService {
             response.put("message", "Error fetching columns: " + e.getMessage());
         }
 
-
         return response;
     }
 
