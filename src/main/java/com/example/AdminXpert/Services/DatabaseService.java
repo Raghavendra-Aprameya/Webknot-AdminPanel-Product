@@ -7,6 +7,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,6 +79,43 @@ public class DatabaseService {
         } catch (Exception e) {
             response.put("status", "error");
             response.put("message", "Database connection error: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    public List<String> getTableNames() {
+        if (this.jdbcTemplate == null) {
+            throw new IllegalStateException("Database is not connected.");
+        }
+
+        String sqlQuery = "SHOW TABLES";
+        try {
+            return jdbcTemplate.queryForList(sqlQuery, String.class);
+        } catch (Exception e) {
+            sqlQuery = "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
+            return jdbcTemplate.queryForList(sqlQuery, String.class);
+        }
+    }
+
+
+    public Map<String, Object> getColumnNames(String tableName) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (jdbcTemplate == null) {
+            response.put("status", "error");
+            response.put("message", "Database is not connected.");
+            return response;
+        }
+
+
+        try {
+            String sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ?";
+            List<String> columnNames = jdbcTemplate.queryForList(sql, new Object[]{tableName}, String.class);
+            response.put("columns", columnNames);
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "Error fetching columns: " + e.getMessage());
         }
 
         return response;
