@@ -26,6 +26,7 @@ public class DatabaseController {
     }
 
 
+
     @GetMapping("/fetch-columns/{tableName}")
     public Map<String, Object> getColumnNames(@PathVariable String tableName) {
         return databaseService.getColumnNames(tableName);
