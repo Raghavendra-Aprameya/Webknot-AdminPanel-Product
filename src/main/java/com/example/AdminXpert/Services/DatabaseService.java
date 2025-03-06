@@ -99,7 +99,9 @@ public class DatabaseService {
     }
 
 
-    public Map<String, Object> getColumnNames(String tableName) {
+
+
+    public Map<String, Object> getTableData(String tableName) {
         Map<String, Object> response = new HashMap<>();
 
         if (jdbcTemplate == null) {
@@ -108,18 +110,24 @@ public class DatabaseService {
             return response;
         }
 
-
         try {
-            String sql = "SELECT column_name FROM information_schema.columns WHERE table_name = ?";
-            List<String> columnNames = jdbcTemplate.queryForList(sql, new Object[]{tableName}, String.class);
+            //fetch column names
+            String columnSql = "SELECT column_name FROM information_schema.columns WHERE table_name = ?";
+            List<String> columnNames = jdbcTemplate.queryForList(columnSql, new Object[]{tableName}, String.class);
+
+            //fetch rows
+            String dataSql = "SELECT * FROM " + tableName;
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList(dataSql);
             response.put("columns", columnNames);
+            response.put("rows", rows);
         } catch (Exception e) {
             response.put("status", "error");
-            response.put("message", "Error fetching columns: " + e.getMessage());
+            response.put("message", "Error fetching data: " + e.getMessage());
         }
 
         return response;
     }
+
 
     // ✅ Extracts database type, host, port, and database from connection URL (ignores username/password)
     private Map<String, String> extractConnectionDetails(String connectionUrl) {
