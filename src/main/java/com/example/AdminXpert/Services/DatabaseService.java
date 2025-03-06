@@ -17,11 +17,10 @@ public class DatabaseService {
 
     private JdbcTemplate jdbcTemplate;
 
-    // ✅ Method to establish a database connection using user-provided credentials
+    // establish a database connection
     public Map<String, String> connectAndInitializeDb(DbConnectDTO dbConnectDTO) {
         Map<String, String> response = new HashMap<>();
 
-        // ✅ Get username, password, and connection URL from user input
         String username = dbConnectDTO.getUsername();
         String password = dbConnectDTO.getPassword();
         String connectionUrl = dbConnectDTO.getConnectionUrl();
@@ -33,7 +32,7 @@ public class DatabaseService {
             return response;
         }
 
-        // ✅ Extract connection details (host, port, database, dbType)
+        // Extract connection details
         Map<String, String> connectionDetails = extractConnectionDetails(connectionUrl);
         String dbType = connectionDetails.get("dbType");
         String host = connectionDetails.get("host");
@@ -47,17 +46,17 @@ public class DatabaseService {
         }
 
         try {
-            // ✅ Construct JDBC URL based on the extracted database type
+            //Construct JDBC URL
             String jdbcUrl;
             if ("postgresql".equalsIgnoreCase(dbType)) {
                 jdbcUrl = "jdbc:postgresql://" + host + (port.isEmpty() ? "" : ":" + port) + "/" + database;
                 if (connectionUrl.contains("?sslmode=require")) {
-                    jdbcUrl += "?sslmode=require"; // Keep SSL if present in the original URL
+                    jdbcUrl += "?sslmode=require";
                 }
             } else if ("mysql".equalsIgnoreCase(dbType)) {
                 jdbcUrl = "jdbc:mysql://" + host + (port.isEmpty() ? "" : ":" + port) + "/" + database;
                 if (connectionUrl.contains("?ssl-mode=REQUIRED")) {
-                    jdbcUrl += "?useSSL=true"; // MySQL requires useSSL=true for secure connections
+                    jdbcUrl += "?useSSL=true";
                 }
             } else {
                 response.put("status", "error");
@@ -65,7 +64,7 @@ public class DatabaseService {
                 return response;
             }
 
-            // ✅ Set up the data source and test connection
+            //Set up the data source and test connection
             DriverManagerDataSource dataSource = new DriverManagerDataSource();
             dataSource.setUrl(jdbcUrl);
             dataSource.setUsername(username);
@@ -99,8 +98,6 @@ public class DatabaseService {
     }
 
 
-
-
     public Map<String, Object> getTableData(String tableName) {
         Map<String, Object> response = new HashMap<>();
 
@@ -129,19 +126,19 @@ public class DatabaseService {
     }
 
 
-    // ✅ Extracts database type, host, port, and database from connection URL (ignores username/password)
+    // Extracts database type, host, port, and database from connection URL
     private Map<String, String> extractConnectionDetails(String connectionUrl) {
         Map<String, String> details = new HashMap<>();
 
-        // Regex to extract connection details (ignores username & password)
+        // Regex to extract connection details
         Pattern pattern = Pattern.compile("^(\\w+)://(?:[^:@]+:[^@]+@)?([^:/]+)(?::(\\d+))?/([^?]+)");
         Matcher matcher = pattern.matcher(connectionUrl);
 
         if (matcher.find()) {
-            details.put("dbType", matcher.group(1));   // Database type (mysql/postgresql)
-            details.put("host", matcher.group(2));     // Host
-            details.put("port", matcher.group(3) != null ? matcher.group(3) : ""); // Port (optional)
-            details.put("database", matcher.group(4)); // Database name
+            details.put("dbType", matcher.group(1));
+            details.put("host", matcher.group(2));
+            details.put("port", matcher.group(3) != null ? matcher.group(3) : "");
+            details.put("database", matcher.group(4));
         } else {
             details.put("dbType", "");
             details.put("host", "");
